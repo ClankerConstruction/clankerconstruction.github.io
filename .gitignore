@@ -1,0 +1,22 @@
+# Hugo build output
+/public/
+/resources/_gen/
+
+# Hugo caches
+/.hugo_build.lock
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local environment
+.env
+.env.*
+!.env.example
