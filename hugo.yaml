@@ -1,3 +1,4 @@
-baseURL: https://example.org/
+baseURL: https://clankerconstruction.github.io/
 locale: en-us
-title: My New Hugo Project
+title: ClankerConstruction's Blog
+theme: ["PaperMod"]
