@@ -1,0 +1,132 @@
+{
+ "null_tone_groups_160": [
+  [
+   -256,
+   -254
+  ],
+  [
+   -128,
+   -128
+  ],
+  [
+   -2,
+   2
+  ],
+  [
+   128,
+   128
+  ],
+  [
+   254,
+   255
+  ]
+ ],
+ "chains_160": 6,
+ "level_2.4": {
+  "records": 411,
+  "notched": 62,
+  "steps_gt_1db": 148,
+  "level_sd_db": 0.82
+ },
+ "level_5": {
+  "records": 344,
+  "notched": 0,
+  "steps_gt_1db": 14,
+  "level_sd_db": 0.36
+ },
+ "stability_2.4 GHz": {
+  "amp_sd_db_median": 0.226,
+  "phase_sd_rad_median": 0.003
+ },
+ "stability_5 GHz": {
+  "amp_sd_db_median": 0.064,
+  "phase_sd_rad_median": 0.0073
+ },
+ "timing_2.4 GHz, ping": {
+  "ppdus": 411,
+  "median_ms": 23.7,
+  "p90_ms": 191.5,
+  "rate_per_s": 13.5
+ },
+ "timing_5 GHz, 1 Mb/s upload": {
+  "ppdus": 344,
+  "median_ms": 64.2,
+  "p90_ms": 117.8,
+  "rate_per_s": 11.5
+ },
+ "xcheck": {
+  "csi_records": 2454,
+  "icap_ppdus": 63,
+  "amp_corr": 0.94,
+  "amp_rms_diff_db": 0.84,
+  "amp_rms_diff_inner_db": 0.46,
+  "edge_rolloff_db": {
+   "csi": -2.42,
+   "icap": -4.53
+  },
+  "phase_corr": 0.897,
+  "phase_rms_diff_rad": 0.0211,
+  "amp_sd_per_tone_db": {
+   "csi": 1.71,
+   "icap": 1.56
+  },
+  "snr_db_median": {
+   "csi": 40.0,
+   "icap_lltf": 45.5
+  },
+  "rssi_dbm": [
+   [
+    -35,
+    1072
+   ],
+   [
+    -34,
+    219
+   ],
+   [
+    -33,
+    1162
+   ],
+   [
+    -27,
+    1
+   ]
+  ],
+  "tr_stream": [
+   [
+    17,
+    2454
+   ]
+  ]
+ },
+ "motion": {
+  "5 GHz HE160 still": {
+   "median": 0.078,
+   "p90": 0.096,
+   "min": 0.059,
+   "max": 0.122,
+   "windows": 30
+  },
+  "5 GHz HE160 walking": {
+   "median": 1.622,
+   "p90": 2.028,
+   "min": 0.457,
+   "max": 2.073,
+   "windows": 30
+  },
+  "2.4 GHz EHT20 still": {
+   "median": 0.255,
+   "p90": 0.424,
+   "min": 0.017,
+   "max": 0.757,
+   "windows": 28
+  },
+  "2.4 GHz EHT20 walking": {
+   "median": 0.373,
+   "p90": 0.473,
+   "min": 0.083,
+   "max": 0.7,
+   "windows": 29
+  }
+ }
+}
