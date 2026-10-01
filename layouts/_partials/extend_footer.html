@@ -1,0 +1,430 @@
+<style>
+    .mermaid-block {
+        position: relative;
+        margin: 1.5rem 0;
+        transition: transform 140ms ease, opacity 140ms ease;
+    }
+
+    .mermaid-toolbar {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        display: flex;
+        gap: 0.35rem;
+        z-index: 3;
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 140ms ease, transform 140ms ease;
+    }
+
+    .mermaid-block:hover .mermaid-toolbar,
+    .mermaid-block:focus-within .mermaid-toolbar,
+    .mermaid-block.is-overlay .mermaid-toolbar {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .mermaid-button {
+        appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--theme) 84%, transparent);
+        backdrop-filter: blur(10px);
+        color: var(--primary);
+        cursor: pointer;
+        height: 2rem;
+        width: 2rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mermaid-button:hover {
+        border-color: var(--secondary);
+        color: var(--secondary);
+    }
+
+    .mermaid-button svg {
+        width: 0.95rem;
+        height: 0.95rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+        overflow: visible;
+    }
+
+    .mermaid-stage {
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--entry);
+        padding: 1rem;
+        padding-top: 2.85rem;
+        position: relative;
+        cursor: auto;
+        touch-action: none;
+    }
+
+    .mermaid-stage svg {
+        display: block;
+        margin: 0 auto;
+        max-width: none;
+        transition: width 120ms ease, height 120ms ease;
+    }
+
+    .mermaid-stage.is-pannable {
+        cursor: grab;
+    }
+
+    .mermaid-stage.is-dragging {
+        cursor: grabbing;
+    }
+
+    .mermaid-block.is-overlay .mermaid-stage {
+        box-shadow: 0 0 0 100vmax color-mix(in srgb, var(--theme) 28%, transparent), 0 24px 60px rgba(0, 0, 0, 0.32);
+    }
+
+    .mermaid-block.is-overlay {
+        position: fixed;
+        inset: 1rem;
+        margin: 0;
+        z-index: 1000;
+    }
+
+    .mermaid-block.is-overlay .mermaid-stage {
+        height: calc(100vh - 2rem);
+        padding-top: 3.25rem;
+    }
+
+    .mermaid-block.is-overlay .mermaid-toolbar {
+        top: 1rem;
+        right: 1rem;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+        .mermaid-toolbar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mermaid-stage {
+            cursor: auto;
+            touch-action: pan-x pan-y;
+        }
+    }
+</style>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+    const html = document.documentElement;
+    let activeTheme = null;
+    let renderChain = Promise.resolve();
+    let activeOverlayBlock = null;
+
+    const mermaidTheme = (mode) => ({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: mode === 'dark'
+            ? {
+                background: '#0f172a',
+                primaryColor: '#1e293b',
+                primaryBorderColor: '#94a3b8',
+                primaryTextColor: '#e2e8f0',
+                secondaryColor: '#172033',
+                secondaryBorderColor: '#7dd3fc',
+                secondaryTextColor: '#e2e8f0',
+                tertiaryColor: '#111827',
+                tertiaryBorderColor: '#60a5fa',
+                tertiaryTextColor: '#e2e8f0',
+                lineColor: '#94a3b8',
+                textColor: '#e2e8f0',
+                mainBkg: '#1e293b',
+                nodeBkg: '#1e293b',
+                clusterBkg: '#111827',
+                clusterBorder: '#475569',
+                edgeLabelBackground: '#0f172a',
+                actorBkg: '#1e293b',
+                actorBorder: '#94a3b8',
+                actorTextColor: '#e2e8f0',
+                labelBoxBkgColor: '#0f172a',
+                labelBoxBorderColor: '#475569',
+                labelTextColor: '#e2e8f0',
+                noteBkgColor: '#1f2937',
+                noteBorderColor: '#94a3b8',
+                noteTextColor: '#e2e8f0',
+                activationBorderColor: '#94a3b8',
+                activationBkgColor: '#334155',
+                sequenceNumberColor: '#0f172a'
+            }
+            : {
+                background: '#ffffff',
+                primaryColor: '#f8fafc',
+                primaryBorderColor: '#475569',
+                primaryTextColor: '#0f172a',
+                secondaryColor: '#eff6ff',
+                secondaryBorderColor: '#2563eb',
+                secondaryTextColor: '#0f172a',
+                tertiaryColor: '#f8fafc',
+                tertiaryBorderColor: '#475569',
+                tertiaryTextColor: '#0f172a',
+                lineColor: '#475569',
+                textColor: '#0f172a',
+                mainBkg: '#f8fafc',
+                nodeBkg: '#f8fafc',
+                clusterBkg: '#f1f5f9',
+                clusterBorder: '#94a3b8',
+                edgeLabelBackground: '#ffffff',
+                actorBkg: '#f8fafc',
+                actorBorder: '#475569',
+                actorTextColor: '#0f172a',
+                labelBoxBkgColor: '#ffffff',
+                labelBoxBorderColor: '#94a3b8',
+                labelTextColor: '#0f172a',
+                noteBkgColor: '#fffbeb',
+                noteBorderColor: '#d97706',
+                noteTextColor: '#0f172a',
+                activationBorderColor: '#475569',
+                activationBkgColor: '#e2e8f0',
+                sequenceNumberColor: '#ffffff'
+            }
+    });
+
+    const diagramBlocks = () => document.querySelectorAll('.mermaid-block');
+
+    const closeOverlay = (block) => {
+        const target = block ?? activeOverlayBlock;
+        if (!target) {
+            return;
+        }
+
+        target.classList.remove('is-overlay');
+        if (activeOverlayBlock === target) {
+            activeOverlayBlock = null;
+        }
+    };
+
+    const normalizeStage = (block) => {
+        const stage = block.querySelector('.mermaid-stage');
+        const svg = block.querySelector('.mermaid svg');
+        if (!stage || !svg) {
+            return;
+        }
+
+        const baseWidth = Number(block.dataset.baseWidth ?? '0');
+        const baseHeight = Number(block.dataset.baseHeight ?? '0');
+        const scale = Number(block.dataset.scale ?? '1');
+
+        if (!baseWidth || !baseHeight) {
+            return;
+        }
+
+        const stageStyles = window.getComputedStyle(stage);
+        const availableWidth = Math.max(
+            1,
+            stage.clientWidth - Number.parseFloat(stageStyles.paddingLeft) - Number.parseFloat(stageStyles.paddingRight)
+        );
+        const fitScale = Math.min(1, availableWidth / baseWidth);
+        const effectiveScale = fitScale * scale;
+
+        svg.style.width = `${baseWidth * effectiveScale}px`;
+        svg.style.height = `${baseHeight * effectiveScale}px`;
+        stage.classList.toggle('is-pannable', scale > 1.02 || block.classList.contains('is-overlay'));
+    };
+
+    const setDiagramScale = (block, scale) => {
+        const nextScale = Math.min(3, Math.max(0.5, scale));
+
+        block.dataset.scale = String(nextScale);
+        normalizeStage(block);
+    };
+
+    const renderDiagram = async (block, index) => {
+        const target = block.querySelector('.mermaid');
+        if (!target) {
+            return;
+        }
+
+        const source = target.dataset.source ?? target.textContent.trim();
+        target.dataset.source = source;
+
+        const renderId = `mermaid-${activeTheme}-${index}`;
+        const { svg, bindFunctions } = await mermaid.render(renderId, source);
+        target.innerHTML = svg;
+        bindFunctions?.(target);
+
+        const renderedSvg = target.querySelector('svg');
+        if (renderedSvg) {
+            const viewBox = renderedSvg.viewBox.baseVal;
+            const fallbackWidth = renderedSvg.getBoundingClientRect().width || renderedSvg.width.baseVal.value || viewBox.width;
+            const fallbackHeight = renderedSvg.getBoundingClientRect().height || renderedSvg.height.baseVal.value || viewBox.height;
+            block.dataset.baseWidth = String(viewBox.width || fallbackWidth);
+            block.dataset.baseHeight = String(viewBox.height || fallbackHeight);
+        }
+
+        setDiagramScale(block, Number(block.dataset.scale ?? '1'));
+    };
+
+    const renderMermaid = () => {
+        renderChain = renderChain.then(async () => {
+            const nextTheme = html.dataset.theme === 'dark' ? 'dark' : 'light';
+            const blocks = diagramBlocks();
+
+            if (blocks.length === 0) {
+                activeTheme = nextTheme;
+                return;
+            }
+
+            if (nextTheme === activeTheme && Array.from(blocks).every((block) => block.dataset.rendered === 'true')) {
+                return;
+            }
+
+            activeTheme = nextTheme;
+            mermaid.initialize(mermaidTheme(nextTheme));
+
+            for (const [index, block] of Array.from(blocks).entries()) {
+                block.dataset.rendered = 'false';
+                await renderDiagram(block, index);
+                block.dataset.rendered = 'true';
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
+        return renderChain;
+    };
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-mermaid-action]');
+        if (!button) {
+            return;
+        }
+
+        const block = button.closest('.mermaid-block');
+        if (!block) {
+            return;
+        }
+
+        const currentScale = Number(block.dataset.scale ?? '1');
+        const action = button.dataset.mermaidAction;
+
+        if (action === 'zoom-in') {
+            setDiagramScale(block, currentScale + 0.2);
+            return;
+        }
+
+        if (action === 'zoom-out') {
+            setDiagramScale(block, currentScale - 0.2);
+            return;
+        }
+
+        if (action === 'reset') {
+            setDiagramScale(block, 1);
+            const stage = block.querySelector('.mermaid-stage');
+            if (stage) {
+                stage.scrollLeft = 0;
+                stage.scrollTop = 0;
+            }
+            return;
+        }
+
+        if (action === 'overlay') {
+            if (block.classList.contains('is-overlay')) {
+                closeOverlay(block);
+                normalizeStage(block);
+                return;
+            }
+
+            if (activeOverlayBlock && activeOverlayBlock !== block) {
+                closeOverlay(activeOverlayBlock);
+            }
+
+            block.classList.add('is-overlay');
+            activeOverlayBlock = block;
+            normalizeStage(block);
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeOverlay();
+        }
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+        const stage = event.target.closest('.mermaid-stage');
+        if (!stage || event.target.closest('[data-mermaid-action]')) {
+            return;
+        }
+
+        const block = stage.closest('.mermaid-block');
+        if (!block) {
+            return;
+        }
+
+        const scale = Number(block.dataset.scale ?? '1');
+        const canPan = scale > 1.02 || block.classList.contains('is-overlay');
+        if (!canPan) {
+            return;
+        }
+
+        stage.classList.add('is-dragging');
+        stage.setPointerCapture(event.pointerId);
+        stage.dataset.dragPointer = String(event.pointerId);
+        stage.dataset.dragStartX = String(event.clientX);
+        stage.dataset.dragStartY = String(event.clientY);
+        stage.dataset.dragScrollLeft = String(stage.scrollLeft);
+        stage.dataset.dragScrollTop = String(stage.scrollTop);
+        event.preventDefault();
+    });
+
+    document.addEventListener('pointermove', (event) => {
+        const stage = event.target.closest('.mermaid-stage.is-dragging');
+        if (!stage || stage.dataset.dragPointer !== String(event.pointerId)) {
+            return;
+        }
+
+        const deltaX = event.clientX - Number(stage.dataset.dragStartX ?? '0');
+        const deltaY = event.clientY - Number(stage.dataset.dragStartY ?? '0');
+        stage.scrollLeft = Number(stage.dataset.dragScrollLeft ?? '0') - deltaX;
+        stage.scrollTop = Number(stage.dataset.dragScrollTop ?? '0') - deltaY;
+    });
+
+    const stopDragging = (stage, pointerId) => {
+        if (!stage || stage.dataset.dragPointer !== String(pointerId)) {
+            return;
+        }
+
+        stage.classList.remove('is-dragging');
+        stage.releasePointerCapture(pointerId);
+        delete stage.dataset.dragPointer;
+        delete stage.dataset.dragStartX;
+        delete stage.dataset.dragStartY;
+        delete stage.dataset.dragScrollLeft;
+        delete stage.dataset.dragScrollTop;
+    };
+
+    document.addEventListener('pointerup', (event) => {
+        stopDragging(event.target.closest('.mermaid-stage'), event.pointerId);
+    });
+
+    document.addEventListener('pointercancel', (event) => {
+        stopDragging(event.target.closest('.mermaid-stage'), event.pointerId);
+    });
+
+    window.addEventListener('resize', () => {
+        diagramBlocks().forEach((block) => {
+            normalizeStage(block);
+        });
+    });
+
+    const observer = new MutationObserver(() => {
+        renderMermaid();
+    });
+
+    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+    renderMermaid();
+</script>
