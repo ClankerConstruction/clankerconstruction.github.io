@@ -1,4 +1,5 @@
 baseURL: https://clankerconstruction.github.io/
 locale: en-us
 title: ClankerConstruction's Blog
+archetypeDir: _archetypes
 theme: ["PaperMod"]
