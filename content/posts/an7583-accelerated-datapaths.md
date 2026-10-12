@@ -2,7 +2,7 @@
 title: 'Hardware-accelerated Datapaths of Airoha AN7583'
 date: '2026-10-12T07:26:31Z'
 draft: false
-tags: [Airoha, AN7583, PPE, NPU, Hardware-Accelerated, Benchmark, Datapaths, Frame-Engine]
+tags: [Airoha, AN7583, PPE, NPU, Hardware-Accelerated, Benchmark, Datapaths, Frame-Engine, Crypto, QoS]
 categories: []
 summary: "Inside the Airoha AN7583: The Accelerated Datapaths"
 ---
